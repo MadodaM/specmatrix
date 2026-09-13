@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables & secrets (CRITICAL)
+.env
+*.env
+.env.*
+
+# Astro build outputs
+dist/
+.astro/
+
+# OS Files
+.DS_Store
+Thumbs.db

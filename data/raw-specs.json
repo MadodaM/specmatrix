@@ -1,0 +1,19 @@
+[
+  {
+    "category": { "name": "Commercial & Fleet Trucks", "slug": "commercial-vehicles" },
+    "brand": { "name": "Scania", "slug": "scania" },
+    "model": "R650 V8 Highline",
+    "years": { "start": 2021, "end": 2026 },
+    "slug": "scania-r650-highline-2021",
+    "specifications": {
+      "fuel_type": "Diesel",
+      "engine_displacement": "16.4L V8",
+      "horsepower": "650 hp",
+      "torque": "3300 Nm",
+      "emission_standard": "Euro 6"
+    },
+    "replacement_parts": [
+      { "name": "V8 Oil Filter Cartridge", "part_no": "SCN-2412891", "url": "https://example.com/affiliate/scania-filter" }
+    ]
+  }
+]
