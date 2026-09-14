@@ -47,18 +47,27 @@ const { data: relatedEntities } = await supabase
   title={`${entity?.brands?.name} ${entity?.model_name} Specs | SpecMatrix`}
   description={`Full technical specifications and production timelines for the ${entity?.brands?.name} ${entity?.model_name} (${entity?.year_start}-${entity?.year_end || 'Present'}).`}
 >
-  <!-- JSON-LD Schema for Google Rich Results -->
+  <!-- JSON-LD Schema for Technical Reference Data -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org/",
-    "@type": "Product",
-    "name": `${entity?.brands?.name} ${entity?.model_name}`,
-    "brand": {
-      "@type": "Brand",
-      "name": entity?.brands?.name
+    "@type": "TechArticle",
+    "headline": `${entity?.brands?.name} ${entity?.model_name} Technical Specifications`,
+    "about": {
+      "@type": "Product",
+      "name": `${entity?.brands?.name} ${entity?.model_name}`,
+      "brand": {
+        "@type": "Brand",
+        "name": entity?.brands?.name
+      },
+      "category": entity?.categories?.name,
+      "releaseDate": String(entity?.year_start)
     },
-    "category": entity?.categories?.name,
-    "releaseDate": entity?.year_start,
-    "description": `Technical specifications and compatible parts for the ${entity?.brands?.name} ${entity?.model_name}.`
+    "description": `Comprehensive technical specifications, production timeline, and engineering data for the ${entity?.brands?.name} ${entity?.model_name}.`,
+    "publisher": {
+      "@type": "Organization",
+      "name": "SpecMatrix",
+      "url": "https://specmatrix.io"
+    }
   })} />
 
   <main class="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
