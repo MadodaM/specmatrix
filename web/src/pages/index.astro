@@ -1,0 +1,116 @@
+---
+import { createClient } from '@supabase/supabase-js';
+import '../styles/global.css';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+// Fetch categories, brands, and all entities for browsing
+const { data: categories } = await supabase.from('categories').select('*');
+const { data: brands } = await supabase.from('brands').select('*');
+const { data: entities, error } = await supabase
+  .from('entities')
+  .select(`
+    model_name,
+    year_start,
+    year_end,
+    slug,
+    categories (name),
+    brands (name)
+  `);
+
+if (error) {
+  console.error("Error loading homepage data:", error.message);
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SpecMatrix | Industrial, Automotive & Machinery Specifications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Comprehensive technical specifications and compatible replacement parts for heavy vehicles, machinery, and industrial tools." />
+  </head>
+  <body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
+
+    <!-- Header / Hero Section -->
+    <header class="bg-slate-900 text-white py-16 px-6 border-b border-slate-800">
+      <div class="max-w-5xl mx-auto text-center">
+        <span class="text-xs uppercase tracking-widest bg-blue-600 text-white px-3 py-1 rounded-full font-semibold">
+          Programmatic Technical Database
+        </span>
+        <h1 class="text-4xl sm:text-5xl font-extrabold mt-4 tracking-tight">
+          SpecMatrix
+        </h1>
+        <p class="text-lg text-slate-300 mt-3 max-w-2xl mx-auto">
+          Instant engineering specifications, performance metrics, and verified replacement parts across heavy transport, construction machinery, and industrial gear.
+        </p>
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl mx-auto px-6 py-12 w-full space-y-12">
+
+      {/* Categories Grid */}
+      {categories && categories.length > 0 && (
+        <section>
+          <h2 class="text-2xl font-bold text-slate-800 mb-6">Browse by Category</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {categories.map((cat) => (
+              <div class="p-5 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-400 transition-colors">
+                <h3 class="font-bold text-lg text-slate-900">{cat.name}</h3>
+                <p class="text-xs text-gray-500 font-mono mt-1">Slug: /{cat.slug}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Complete Specifications Directory */}
+      <section>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-slate-800">All Indexed Specifications</h2>
+          <span class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+            {entities ? entities.length : 0} Models Active
+          </span>
+        </div>
+
+        {entities && entities.length > 0 ? (
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {entities.map((item: any) => (
+              <a href={`/specs/${item.slug}`} 
+                 class="block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-blue-500 transition-all group">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-bold text-blue-600 uppercase tracking-wide">
+                    {item.categories?.name}
+                  </span>
+                  <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono">
+                    {item.year_start}–{item.year_end}
+                  </span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mt-2 group-hover:text-blue-600 transition-colors">
+                  {item.brands?.name} {item.model_name}
+                </h3>
+                <p class="text-sm text-gray-500 mt-3 flex items-center font-medium">
+                  View Full Specifications &rarr;
+                </p>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="p-8 bg-white border rounded-lg text-center text-gray-500">
+            No specifications indexed yet. Run your ingestion script to populate records.
+          </div>
+        )}
+      </section>
+
+    </main>
+
+    {/* Footer */}
+    <footer class="bg-white border-t border-gray-200 py-6 text-center text-sm text-gray-500">
+      <p>&copy; 2026 SpecMatrix.io. All rights reserved. Powered by Astro & Supabase.</p>
+    </footer>
+
+  </body>
+</html>
