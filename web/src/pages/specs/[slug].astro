@@ -1,22 +1,21 @@
 ---
 import { createClient } from '@supabase/supabase-js';
-import '../../styles/global.css'; // Imports Tailwind CSS
 
-// 1. Tell Astro which static pages to generate
-export async function getStaticPaths() {
-  const url = import.meta.env.PUBLIC_SUPABASE_URL;
-  const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-  
-  console.log("Checking Env Variables:", url ? "URL Loaded" : "URL MISSING!");
+// Retrieve and clean environment variables
+const rawUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL || '';
+const rawKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY || '';
 
-  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
-  const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY;
+// Strip accidental quotes or leading/trailing whitespace
+const supabaseUrl = rawUrl.replace(/["']/g, '').trim();
+const supabaseKey = rawKey.replace(/["']/g, '').trim();
 
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Missing Supabase Environment Variables during build!");
-  }
+console.log(`[Build Check] Target Supabase URL: "${supabaseUrl}"`);
 
- const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl.startsWith('http://') && !supabaseUrl.startsWith('https://')) {
+  throw new Error(`[Build Error] Invalid PUBLIC_SUPABASE_URL resolved: "${supabaseUrl}". Verify Cloudflare Environment Variables.`);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
   
   // Fetch all slugs for all entities
   const { data: entities, error } = await supabase.from('entities').select('slug');

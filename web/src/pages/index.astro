@@ -1,11 +1,21 @@
 ---
 import { createClient } from '@supabase/supabase-js';
-import '../styles/global.css';
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-);
+// Retrieve and clean environment variables
+const rawUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL || '';
+const rawKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Strip accidental quotes or leading/trailing whitespace
+const supabaseUrl = rawUrl.replace(/["']/g, '').trim();
+const supabaseKey = rawKey.replace(/["']/g, '').trim();
+
+console.log(`[Build Check] Target Supabase URL: "${supabaseUrl}"`);
+
+if (!supabaseUrl.startsWith('http://') && !supabaseUrl.startsWith('https://')) {
+  throw new Error(`[Build Error] Invalid PUBLIC_SUPABASE_URL resolved: "${supabaseUrl}". Verify Cloudflare Environment Variables.`);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Fetch categories, brands, and all entities for browsing
 const { data: categories } = await supabase.from('categories').select('*');
