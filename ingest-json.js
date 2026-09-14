@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
+import { z } from 'zod';
 import 'dotenv/config';
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -13,6 +14,32 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// Define strict validation schema using Zod
+const specRecordSchema = z.object({
+    category: z.object({
+        name: z.string().min(1, "Category name is required"),
+        slug: z.string().min(1, "Category slug is required")
+    }),
+    brand: z.object({
+        name: z.string().min(1, "Brand name is required"),
+        slug: z.string().min(1, "Brand slug is required")
+    }),
+    model: z.string().min(1, "Model name is required"),
+    slug: z.string().min(1, "Entity slug is required"),
+    years: z.object({
+        start: z.number().int().min(1900).max(2100),
+        end: z.number().int().min(1900).max(2100).nullable().optional()
+    }),
+    specifications: z.record(z.any()).default({}),
+    replacement_parts: z.array(
+        z.object({
+            name: z.string().min(1),
+            part_no: z.string().optional(),
+            url: z.string().optional()
+        })
+    ).optional()
+});
+
 async function processJsonFeed() {
     const filePath = path.resolve('data/raw-specs.json');
     
@@ -23,11 +50,32 @@ async function processJsonFeed() {
 
     // Read and parse the JSON payload
     const rawData = fs.readFileSync(filePath, 'utf-8');
-    const items = JSON.parse(rawData);
+    let items;
+    try {
+        items = JSON.parse(rawData);
+    } catch (err) {
+        console.error("Failed to parse raw-specs.json as valid JSON:", err.message);
+        process.exit(1);
+    }
 
-    console.log(`Loaded ${items.length} records from raw feed. Processing...`);
+    console.log(`Loaded ${items.length} records from raw feed. Validating and processing...`);
 
-    for (const item of items) {
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (const [index, rawItem] of items.entries()) {
+        // Validate record using Zod
+        const validationResult = specRecordSchema.safeParse(rawItem);
+        
+        if (!validationResult.success) {
+            failureCount++;
+            console.error(`[ValidationError] Record at index ${index} (${rawItem?.slug || 'unknown-slug'}) failed validation:`);
+            console.error(JSON.stringify(validationResult.error.format(), null, 2));
+            continue; // Skip malformed record, maintain database integrity
+        }
+
+        const item = validationResult.data;
+
         // 1. Upsert Category
         const { data: catData, error: catErr } = await supabase
             .from('categories')
@@ -37,6 +85,7 @@ async function processJsonFeed() {
 
         if (catErr) {
             console.error(`Category error (${item.category.slug}):`, catErr.message);
+            failureCount++;
             continue;
         }
 
@@ -49,6 +98,7 @@ async function processJsonFeed() {
 
         if (brandErr) {
             console.error(`Brand error (${item.brand.slug}):`, brandErr.message);
+            failureCount++;
             continue;
         }
 
@@ -58,7 +108,7 @@ async function processJsonFeed() {
             brand_id: brandData.id,
             model_name: item.model,
             year_start: item.years.start,
-            year_end: item.years.end,
+            year_end: item.years.end || null,
             slug: item.slug,
             specs: item.specifications
         };
@@ -71,6 +121,7 @@ async function processJsonFeed() {
 
         if (entityErr) {
             console.error(`Entity error (${item.slug}):`, entityErr.message);
+            failureCount++;
             continue;
         }
 
@@ -81,8 +132,8 @@ async function processJsonFeed() {
             const partsPayload = item.replacement_parts.map(part => ({
                 entity_id: entityData.id,
                 part_name: part.name,
-                part_number: part.part_no,
-                affiliate_url: part.url
+                part_number: part.part_no || null,
+                affiliate_url: part.url || null
             }));
 
             const { error: partErr } = await supabase
@@ -94,10 +145,13 @@ async function processJsonFeed() {
             }
         }
 
-        console.log(`[Success] Ingested payload for: ${item.slug}`);
+        successCount++;
+        console.log(`[Success] Ingested and validated payload for: ${item.slug}`);
     }
 
-    console.log("JSON feed ingestion pipeline completed.");
+    console.log(`\nIngestion pipeline completed.`);
+    console.log(`Successfully processed: ${successCount} records`);
+    console.log(`Rejected/Failed: ${failureCount} records`);
 }
 
 processJsonFeed();
