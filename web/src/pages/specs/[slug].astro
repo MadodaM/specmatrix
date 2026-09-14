@@ -52,6 +52,7 @@ const { data: relatedEntities } = await supabase
     "@context": "https://schema.org/",
     "@type": "TechArticle",
     "headline": `${entity?.brands?.name} ${entity?.model_name} Technical Specifications`,
+    "description": `Comprehensive technical specifications, production timeline, and engineering data for the ${entity?.brands?.name} ${entity?.model_name} (${entity?.year_start}–${entity?.year_end || 'Present'}).`,
     "image": "https://specmatrix.io/og-image.jpg",
     "author": {
       "@type": "Organization",
@@ -61,18 +62,7 @@ const { data: relatedEntities } = await supabase
       "@type": "Organization",
       "name": "SpecMatrix",
       "url": "https://specmatrix.io"
-    },
-    "about": {
-      "@type": "Product",
-      "name": `${entity?.brands?.name} ${entity?.model_name}`,
-      "brand": {
-        "@type": "Brand",
-        "name": entity?.brands?.name
-      },
-      "category": entity?.categories?.name,
-      "releaseDate": String(entity?.year_start)
-    },
-    "description": `Comprehensive technical specifications, production timeline, and engineering data for the ${entity?.brands?.name} ${entity?.model_name}.`
+    }
   })} />
 
   <main class="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
