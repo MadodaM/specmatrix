@@ -1,28 +1,8 @@
 ---
-import { createClient } from '@supabase/supabase-js';
-
-const getSupabaseClient = () => {
-  const rawUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL || '';
-  const rawKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY || '';
-
-  const supabaseUrl = rawUrl.replace(/["']/g, '').trim();
-  const supabaseKey = rawKey.replace(/["']/g, '').trim();
-
-  if (!supabaseUrl.startsWith('http://') && !supabaseUrl.startsWith('https://')) {
-    throw new Error(`[Build Error] Invalid PUBLIC_SUPABASE_URL resolved: "${supabaseUrl}". Verify Cloudflare Environment Variables.`);
-  }
-
-  return createClient(supabaseUrl, supabaseKey);
-};
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
 
 export async function getStaticPaths() {
-  const rawUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL || '';
-  const rawKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY || '';
-
-  const supabaseUrl = rawUrl.replace(/["']/g, '').trim();
-  const supabaseKey = rawKey.replace(/["']/g, '').trim();
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
   const { data: entities } = await supabase.from('entities').select('slug');
 
   return (entities || []).map((entity) => ({
@@ -31,7 +11,6 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const supabase = getSupabaseClient();
 
 const { data: entity } = await supabase
   .from('entities')
@@ -48,29 +27,22 @@ if (!entity) {
 }
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>{entity?.brands?.name} {entity?.model_name} Specs | SpecMatrix</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={`Full technical specifications for ${entity?.brands?.name} ${entity?.model_name}.`} />
-    
-    <!-- JSON-LD Schema for Google Rich Results -->
-    <script type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org/",
-      "@type": "Product",
-      "name": `${entity?.brands?.name} ${entity?.model_name}`,
-      "brand": {
-        "@type": "Brand",
-        "name": entity?.brands?.name
-      },
-      "category": entity?.categories?.name,
-      "releaseDate": entity?.year_start,
-      "description": `Technical specifications and compatible parts for the ${entity?.brands?.name} ${entity?.model_name}.`
-    })} />
-  </head>
-  <body class="bg-gray-50 text-gray-900 font-sans p-6 md:p-12">
+<Layout title={`${entity?.brands?.name} ${entity?.model_name} Specs | SpecMatrix`}>
+  <!-- JSON-LD Schema for Google Rich Results (Valid anywhere in the DOM) -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": `${entity?.brands?.name} ${entity?.model_name}`,
+    "brand": {
+      "@type": "Brand",
+      "name": entity?.brands?.name
+    },
+    "category": entity?.categories?.name,
+    "releaseDate": entity?.year_start,
+    "description": `Technical specifications and compatible parts for the ${entity?.brands?.name} ${entity?.model_name}.`
+  })} />
+
+  <main class="bg-gray-50 text-gray-900 font-sans p-6 md:p-12 min-h-screen">
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8 border border-gray-100">
       <header class="mb-8 border-b pb-4 border-gray-200">
         <!-- Semantic Breadcrumbs -->
@@ -117,5 +89,5 @@ if (!entity) {
         )}
       </section>
     </div>
-  </body>
-</html>
+  </main>
+</Layout>
