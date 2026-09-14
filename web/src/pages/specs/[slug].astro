@@ -27,7 +27,10 @@ if (!entity) {
 }
 ---
 
-<Layout title={`${entity?.brands?.name} ${entity?.model_name} Specs | SpecMatrix`}>
+<Layout 
+  title={`${entity?.brands?.name} ${entity?.model_name} Specs | SpecMatrix`}
+  description={`Full technical specifications, timelines, and component details for the ${entity?.brands?.name} ${entity?.model_name} (${entity?.year_start}-${entity?.year_end || 'Present'}).`}
+>
   <!-- JSON-LD Schema for Google Rich Results -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org/",
