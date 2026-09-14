@@ -12,13 +12,14 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.params;
 
-// Fetch current entity
+// Fetch current entity along with brands, categories, and compatible parts
 const { data: entity } = await supabase
   .from('entities')
   .select(`
     *,
     brands ( name ),
-    categories ( name )
+    categories ( name ),
+    compatible_parts ( part_name, part_number, affiliate_url )
   `)
   .eq('slug', slug)
   .single();
@@ -119,6 +120,37 @@ const { data: relatedEntities } = await supabase
           <p class="text-base-content/50 italic">No detailed specifications available for this entry.</p>
         )}
       </section>
+
+      <!-- Compatible Parts & Monetization Block -->
+      {entity.compatible_parts && entity.compatible_parts.length > 0 && (
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-base-content mb-4 border-b border-base-200 pb-2">
+            Compatible Parts & Replacement Components
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {entity.compatible_parts.map((part) => (
+              <div class="flex items-center justify-between p-4 bg-base-200/50 rounded-xl border border-base-300">
+                <div>
+                  <h3 class="font-semibold text-base-content">{part.part_name}</h3>
+                  {part.part_number && (
+                    <p class="text-xs text-base-content/60 mt-0.5">OEM Ref: {part.part_number}</p>
+                  )}
+                </div>
+                {part.affiliate_url && (
+                  <a
+                    href={`/go?to=${encodeURIComponent(part.affiliate_url)}&part=${encodeURIComponent(part.part_name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    class="btn btn-sm btn-primary ml-4"
+                  >
+                    View Pricing
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <!-- Related Specifications Block (Internal Linking & PageRank Flow) -->
       {relatedEntities && relatedEntities.length > 0 && (
