@@ -12,6 +12,7 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.params;
 
+// Fetch current entity
 const { data: entity } = await supabase
   .from('entities')
   .select(`
@@ -25,11 +26,26 @@ const { data: entity } = await supabase
 if (!entity) {
   return Astro.redirect('/404');
 }
+
+// Fetch related specifications within the same category for internal linking & PageRank flow
+const { data: relatedEntities } = await supabase
+  .from('entities')
+  .select(`
+    slug,
+    model_name,
+    year_start,
+    year_end,
+    brands ( name ),
+    categories ( name )
+  `)
+  .eq('category_id', entity.category_id)
+  .neq('id', entity.id)
+  .limit(3);
 ---
 
 <Layout 
   title={`${entity?.brands?.name} ${entity?.model_name} Specs | SpecMatrix`}
-  description={`Full technical specifications, timelines, and component details for the ${entity?.brands?.name} ${entity?.model_name} (${entity?.year_start}-${entity?.year_end || 'Present'}).`}
+  description={`Full technical specifications and production timelines for the ${entity?.brands?.name} ${entity?.model_name} (${entity?.year_start}-${entity?.year_end || 'Present'}).`}
 >
   <!-- JSON-LD Schema for Google Rich Results -->
   <script type="application/ld+json" set:html={JSON.stringify({
@@ -48,12 +64,13 @@ if (!entity) {
   <main class="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto bg-base-100 rounded-2xl shadow-xl p-8 border border-base-300">
       
-      <!-- Breadcrumbs -->
+      <!-- Full Hierarchy Breadcrumbs: Home > Category > Brand > Model -->
       <div class="text-sm breadcrumbs mb-6 text-base-content/70">
         <ul>
           <li><a href="/" class="hover:text-primary">Home</a></li>
           <li class="capitalize">{entity.categories?.name}</li>
-          <li class="capitalize text-primary font-semibold">{entity.brands?.name}</li>
+          <li class="capitalize">{entity.brands?.name}</li>
+          <li class="capitalize text-primary font-semibold">{entity.model_name}</li>
         </ul>
       </div>
 
@@ -82,7 +99,7 @@ if (!entity) {
       </div>
 
       <!-- Technical Specifications Section -->
-      <section>
+      <section class="mb-12">
         <h2 class="text-2xl font-bold text-base-content mb-4 border-b border-base-200 pb-2">Technical Specifications</h2>
         {entity.specs && Object.keys(entity.specs).length > 0 ? (
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -97,6 +114,21 @@ if (!entity) {
           <p class="text-base-content/50 italic">No detailed specifications available for this entry.</p>
         )}
       </section>
+
+      <!-- Related Specifications Block (Internal Linking & PageRank Flow) -->
+      {relatedEntities && relatedEntities.length > 0 && (
+        <section class="border-t border-base-200 pt-8">
+          <h2 class="text-xl font-bold text-base-content mb-4">Related {entity.categories?.name} Specifications</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {relatedEntities.map((item) => (
+              <a href={`/specs/${item.slug}`} class="p-4 bg-base-200/60 rounded-xl border border-base-300 hover:border-primary transition-all">
+                <h3 class="font-bold text-base-content text-sm">{item.brands?.name} {item.model_name}</h3>
+                <p class="text-xs text-base-content/60 mt-1">{item.year_start} – {item.year_end || 'Present'}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
     </div>
   </main>
