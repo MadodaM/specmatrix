@@ -28,7 +28,7 @@ if (!entity) {
 ---
 
 <Layout title={`${entity?.brands?.name} ${entity?.model_name} Specs | SpecMatrix`}>
-  <!-- JSON-LD Schema for Google Rich Results (Valid anywhere in the DOM) -->
+  <!-- JSON-LD Schema for Google Rich Results -->
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org/",
     "@type": "Product",
@@ -42,52 +42,59 @@ if (!entity) {
     "description": `Technical specifications and compatible parts for the ${entity?.brands?.name} ${entity?.model_name}.`
   })} />
 
-  <main class="bg-gray-50 text-gray-900 font-sans p-6 md:p-12 min-h-screen">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8 border border-gray-100">
-      <header class="mb-8 border-b pb-4 border-gray-200">
-        <!-- Semantic Breadcrumbs -->
-        <nav aria-label="Breadcrumb" class="mb-4">
-          <ol class="flex items-center space-x-2 text-sm text-gray-500 font-medium">
-            <li><a href="/" class="hover:text-blue-600 transition-colors">Home</a></li>
-            <li><span class="text-gray-400">/</span></li>
-            <li class="capitalize">{entity.categories?.name}</li>
-            <li><span class="text-gray-400">/</span></li>
-            <li class="capitalize text-blue-600">{entity.brands?.name}</li>
-          </ol>
-        </nav>
+  <main class="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto bg-base-100 rounded-2xl shadow-xl p-8 border border-base-300">
+      
+      <!-- Breadcrumbs -->
+      <div class="text-sm breadcrumbs mb-6 text-base-content/70">
+        <ul>
+          <li><a href="/" class="hover:text-primary">Home</a></li>
+          <li class="capitalize">{entity.categories?.name}</li>
+          <li class="capitalize text-primary font-semibold">{entity.brands?.name}</li>
+        </ul>
+      </div>
 
-        <h1 class="text-4xl font-extrabold mt-2 text-gray-900">
-          {entity.brands?.name} {entity.model_name} <span class="text-gray-500 font-light">({entity.year_start}-{entity.year_end})</span>
+      <!-- Header Section -->
+      <header class="mb-8 border-b border-base-200 pb-6">
+        <h1 class="text-4xl font-extrabold text-base-content">
+          {entity.brands?.name} {entity.model_name} 
+          <span class="text-base-content/50 font-light text-2xl">({entity.year_start}–{entity.year_end || 'Present'})</span>
         </h1>
       </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-gray-50 p-4 rounded-lg">
-          <h2 class="font-bold text-gray-700 text-sm uppercase tracking-wider mb-2">Category</h2>
-          <p class="text-lg font-semibold capitalize">{entity.categories?.name}</p>
+      <!-- Overview Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div class="stats shadow bg-base-200 border border-base-300">
+          <div class="stat">
+            <div class="stat-title">Category</div>
+            <div class="stat-value text-lg capitalize">{entity.categories?.name}</div>
+          </div>
         </div>
-        <div class="bg-gray-50 p-4 rounded-lg">
-          <h2 class="font-bold text-gray-700 text-sm uppercase tracking-wider mb-2">Production Years</h2>
-          <p class="text-lg font-semibold">{entity.year_start} – {entity.year_end || 'Present'}</p>
+        <div class="stats shadow bg-base-200 border border-base-300">
+          <div class="stat">
+            <div class="stat-title">Production Timeline</div>
+            <div class="stat-value text-lg">{entity.year_start} – {entity.year_end || 'Present'}</div>
+          </div>
         </div>
       </div>
 
-      <!-- Specifications Display -->
-      <section class="mt-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4 border-b pb-2">Technical Specifications</h2>
+      <!-- Technical Specifications Section -->
+      <section>
+        <h2 class="text-2xl font-bold text-base-content mb-4 border-b border-base-200 pb-2">Technical Specifications</h2>
         {entity.specs && Object.keys(entity.specs).length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             {Object.entries(entity.specs).map(([key, value]) => (
-              <div class="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-100">
-                <span class="font-medium text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
-                <span class="font-bold text-gray-900">{String(value)}</span>
+              <div class="flex justify-between items-center p-4 bg-base-200/50 rounded-lg border border-base-300">
+                <span class="font-medium text-base-content/70 capitalize">{key.replace(/_/g, ' ')}</span>
+                <span class="font-bold text-base-content">{String(value)}</span>
               </div>
             ))}
           </div>
         ) : (
-          <p class="text-gray-500 italic">No detailed specifications available for this entry.</p>
+          <p class="text-base-content/50 italic">No detailed specifications available for this entry.</p>
         )}
       </section>
+
     </div>
   </main>
 </Layout>

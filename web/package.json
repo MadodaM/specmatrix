@@ -20,5 +20,8 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "daisyui": "^5.7.37"
   }
 }
