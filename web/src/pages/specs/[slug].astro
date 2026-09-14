@@ -9,7 +9,14 @@ export async function getStaticPaths() {
   
   console.log("Checking Env Variables:", url ? "URL Loaded" : "URL MISSING!");
 
-  const supabase = createClient(url, key);
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
+  const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase Environment Variables during build!");
+  }
+
+ const supabase = createClient(supabaseUrl, supabaseKey);
   
   // Fetch all slugs for all entities
   const { data: entities, error } = await supabase.from('entities').select('slug');
