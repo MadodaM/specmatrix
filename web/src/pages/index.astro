@@ -43,8 +43,12 @@ const brands = [...new Set(entities?.map(e => e.brands?.name).filter(Boolean))].
 </head>
 <body>
 
-  <h1>Equipment Specifications</h1>
-  <p>Search our database of technical specs and compatible parts.</p>
+	<h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">
+	  Equipment Specifications
+	</h1>
+	<p class="text-lg text-base-content/80 mb-8">
+	  Search our database of technical specs and compatible parts.
+	</p>
 
   <!-- Interactive Search & Filter UI -->
   <div class="controls">
