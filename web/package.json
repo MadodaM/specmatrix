@@ -24,6 +24,6 @@
     "esbuild": true
   },
   "devDependencies": {
-    "daisyui": "^5.7.37"
+    "daisyui": "^4.12.24"
   }
 }
