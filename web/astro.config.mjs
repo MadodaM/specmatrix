@@ -1,11 +1,14 @@
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
+import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
-  site: 'https://specmatrix.io', // Required for sitemap generation
-  vite: {
-    plugins: [tailwindcss()]
-  },
-  integrations: [sitemap()]
+  site: 'https://specmatrix.io',
+  integrations: [
+    tailwind(),
+    sitemap({
+      // This tells Astro to drop any URL containing '/go/' from the XML sitemaps
+      filter: (page) => !page.includes('/go/')
+    })
+  ]
 });
