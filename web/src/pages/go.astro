@@ -1,0 +1,42 @@
+---
+// web/src/pages/go.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Redirecting... | SpecMatrix">
+  <div class="min-h-[70vh] flex flex-col items-center justify-center bg-base-200 px-4">
+    <div class="bg-base-100 p-8 rounded-2xl shadow-xl border border-base-300 text-center max-w-md w-full">
+      <!-- DaisyUI Spinner (Assuming you are using DaisyUI based on your previous classes) -->
+      <span class="loading loading-spinner loading-lg text-primary mb-6"></span>
+      
+      <h1 class="text-2xl font-bold text-base-content mb-2">Finding the best price...</h1>
+      <p class="text-base-content/60">Securely redirecting you to our trusted industrial partner.</p>
+    </div>
+  </div>
+
+  <!-- Client-Side Routing & Tracking Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Grab the destination and part name from the URL query parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const destination = urlParams.get('to');
+      const partName = urlParams.get('part');
+
+      if (destination) {
+        // 2. [TRACKING INJECTION POINT] 
+        // Here is where you will fire your analytics events (e.g., Google Analytics, Plausible, Meta Pixel)
+        // Example: gtag('event', 'affiliate_click', { part_name: partName, url: destination });
+        console.log(`[Affiliate Tracker] Logged outbound click for: ${partName || 'Unknown Part'}`);
+
+        // 3. Execute the redirect
+        // We use a tiny 600ms delay to ensure any tracking pixels have time to fire before leaving the page
+        setTimeout(() => {
+          window.location.href = destination;
+        }, 600);
+      } else {
+        // Fallback: If someone visits /go directly with no parameters, send them home
+        window.location.href = '/';
+      }
+    });
+  </script>
+</Layout>

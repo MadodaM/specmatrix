@@ -68,9 +68,9 @@ const { data: relatedEntities } = await supabase
   })} />
 
   <main class="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto bg-base-100 rounded-2xl shadow-xl p-8 border border-base-300">
+    <div class="max-w-5xl mx-auto bg-base-100 rounded-2xl shadow-xl p-8 border border-base-300">
       
-      <!-- Full Hierarchy Breadcrumbs: Home > Category > Brand > Model -->
+      <!-- Full Hierarchy Breadcrumbs -->
       <div class="text-sm breadcrumbs mb-6 text-base-content/70">
         <ul>
           <li><a href="/" class="hover:text-primary">Home</a></li>
@@ -104,22 +104,39 @@ const { data: relatedEntities } = await supabase
         </div>
       </div>
 
-      <!-- Technical Specifications Section -->
-      <section class="mb-12">
-        <h2 class="text-2xl font-bold text-base-content mb-4 border-b border-base-200 pb-2">Technical Specifications</h2>
-        {entity.specs && Object.keys(entity.specs).length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {Object.entries(entity.specs).map(([key, value]) => (
-              <div class="flex justify-between items-center p-4 bg-base-200/50 rounded-lg border border-base-300">
-                <span class="font-medium text-base-content/70 capitalize">{key.replace(/_/g, ' ')}</span>
-                <span class="font-bold text-base-content">{String(value)}</span>
+      <!-- Layout Grid: Specs on Left, Ad on Right -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        
+        <!-- Left Column: Specs -->
+        <div class="lg:col-span-2">
+          <section>
+            <h2 class="text-2xl font-bold text-base-content mb-4 border-b border-base-200 pb-2">Technical Specifications</h2>
+            {entity.specs && Object.keys(entity.specs).length > 0 ? (
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Object.entries(entity.specs).map(([key, value]) => (
+                  <div class="flex justify-between items-center p-4 bg-base-200/50 rounded-lg border border-base-300">
+                    <span class="font-medium text-base-content/70 capitalize">{key.replace(/_/g, ' ')}</span>
+                    <span class="font-bold text-base-content">{String(value)}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p class="text-base-content/50 italic">No detailed specifications available for this entry.</p>
+            )}
+          </section>
+        </div>
+
+        <!-- Right Column: Zero-CLS Sidebar Ad -->
+        <aside class="lg:col-span-1">
+          <div class="sticky top-8">
+            <!-- The min-h-[300px] class prevents layout shift when the ad loads -->
+            <div class="w-full min-h-[300px] bg-base-200/30 border border-base-300 border-dashed rounded-xl flex items-center justify-center">
+              <span class="text-base-content/40 text-sm">Advertisement Slot</span>
+            </div>
           </div>
-        ) : (
-          <p class="text-base-content/50 italic">No detailed specifications available for this entry.</p>
-        )}
-      </section>
+        </aside>
+
+      </div>
 
       <!-- Compatible Parts & Monetization Block -->
       {entity.compatible_parts && entity.compatible_parts.length > 0 && (
@@ -152,7 +169,7 @@ const { data: relatedEntities } = await supabase
         </section>
       )}
 
-      <!-- Related Specifications Block (Internal Linking & PageRank Flow) -->
+      <!-- Related Specifications Block -->
       {relatedEntities && relatedEntities.length > 0 && (
         <section class="border-t border-base-200 pt-8">
           <h2 class="text-xl font-bold text-base-content mb-4">Related {entity.categories?.name} Specifications</h2>
