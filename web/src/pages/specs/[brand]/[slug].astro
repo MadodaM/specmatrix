@@ -1,12 +1,19 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { supabase } from '../../lib/supabase';
+// Note the extra '../' in these imports due to the new folder depth
+import Layout from '../../../layouts/Layout.astro';
+import { supabase } from '../../../lib/supabase';
 
 export async function getStaticPaths() {
-  const { data: entities } = await supabase.from('entities').select('slug');
+  // We must select the brand slug alongside the entity slug to build the URL
+  const { data: entities } = await supabase
+    .from('entities')
+    .select('slug, brands(slug)');
 
   return (entities || []).map((entity) => ({
-    params: { slug: entity.slug },
+    params: { 
+      brand: entity.brands?.slug || 'unknown',
+      slug: entity.slug 
+    },
   }));
 }
 
@@ -17,8 +24,8 @@ const { data: entity } = await supabase
   .from('entities')
   .select(`
     *,
-    brands ( name ),
-    categories ( name ),
+    brands ( name, slug ),
+    categories ( name, slug ),
     compatible_parts ( part_name, part_number, affiliate_url )
   `)
   .eq('slug', slug)
@@ -36,7 +43,7 @@ const { data: relatedEntities } = await supabase
     model_name,
     year_start,
     year_end,
-    brands ( name ),
+    brands ( name, slug ),
     categories ( name )
   `)
   .eq('category_id', entity.category_id)
