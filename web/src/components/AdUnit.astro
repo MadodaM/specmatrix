@@ -1,0 +1,22 @@
+---
+// src/components/AdUnit.astro
+interface Props {
+  slotId: string;
+  className?: string; // Allows you to pass Tailwind classes for padding/margins
+}
+
+const { slotId, className = "my-8 flex justify-center" } = Astro.props as Props;
+---
+
+<div id={slotId} class={className} aria-hidden="true">
+  <!-- Replace data-ad-client with your actual AdSense Publisher ID -->
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+       data-ad-slot="1234567890" 
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script is:inline>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</div>
