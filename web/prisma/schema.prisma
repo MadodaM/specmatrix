@@ -1,0 +1,58 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model affiliate_clicks {
+  id         BigInt   @id @default(autoincrement())
+  part_name  String
+  target_url String
+  clicked_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model brands {
+  id       String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String
+  slug     String     @unique
+  entities entities[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model categories {
+  id       String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name     String
+  slug     String     @unique
+  entities entities[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model compatible_parts {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  entity_id     String?   @db.Uuid
+  part_name     String
+  part_number   String?
+  affiliate_url String
+  entities      entities? @relation(fields: [entity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model entities {
+  id               String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category_id      String?            @db.Uuid
+  brand_id         String?            @db.Uuid
+  model_name       String
+  year_start       Int?
+  year_end         Int?
+  slug             String             @unique
+  specs            Json               @default("{}")
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  compatible_parts compatible_parts[]
+  brands           brands?            @relation(fields: [brand_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  categories       categories?        @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([slug], map: "idx_entities_slug")
+  @@index([specs], map: "idx_entities_specs", type: Gin)
+}

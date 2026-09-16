@@ -2,8 +2,12 @@
   "name": "specmatrix",
   "type": "module",
   "dependencies": {
+    "@prisma/client": "^7.10.0",
     "@supabase/supabase-js": "^2.116.0",
     "dotenv": "^17.4.2",
     "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "prisma": "^7.10.0"
   }
 }
