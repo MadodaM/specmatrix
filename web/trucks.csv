@@ -1,0 +1,3 @@
+category_name,brand_name,model_name,slug,year_start,gross_combination_mass,engine_torque,fuel_capacity,axle_configuration
+Commercial Trucks,Scania,R500,scania-r500-2024,2024,65000 kg,2550 Nm,1000 L,6x4
+Commercial Trucks,Volvo,FH16,volvo-fh16-2024,2024,75000 kg,3800 Nm,1100 L,8x4
